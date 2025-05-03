@@ -10,6 +10,7 @@ import WatchedSummary from "./components/Main/WatchedList/WatchedSummary";
 import Loader from "./components/shared/Loader";
 import ErrorMessage from "./components/shared/ErrorMessage";
 import useDebouncedValue from "./components/hooks/useDebouncedValue";
+import MovieDetails from "./components/Main/MovieDetails";
 
 const KEY = '9fe50e69';
 
@@ -50,6 +51,19 @@ export default function App() {
         fetchMovies();
     }, [debouncedSearchQuery]);
 
+    // useEffect(() => {
+    //     async function fetchMovie() {
+    //         const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&i=${selectedMovieId}`);
+    //         const data = await res.json();
+    //     }
+    //     if (!selectedMovieId) return;
+    //     fetchMovie();
+    // }, [selectedMovieId]);
+
+    function handleSelectMovie(id) {
+        setSelectedMovieId(prevId => prevId === id ? null : id)
+    }
+
     return (
         <>
             <NavBar>
@@ -59,7 +73,10 @@ export default function App() {
             <Main>
                 <Box>
                     {!isLoading && !error &&
-                        <MovieList movies={movies}/>
+                        <MovieList
+                            movies={movies}
+                            onSelectMovie={handleSelectMovie}
+                        />
                     }
                     {isLoading &&
                         <Loader/>
@@ -67,11 +84,18 @@ export default function App() {
                     {error &&
                         <ErrorMessage message={error}/>
                     }
-                    {}
                 </Box>
                 <Box>
-                    <WatchedSummary watched={watched}/>
-                    <WatchedList watched={watched}/>
+                    {selectedMovieId
+                        ? <MovieDetails
+                            id={selectedMovieId}
+                            onCloseMovie={() => setSelectedMovieId(null)}
+                        /> :
+                        <>
+                            <WatchedSummary watched={watched}/>
+                            <WatchedList watched={watched}/>
+                        </>
+                        }
                 </Box>
             </Main>
         </>

@@ -337,6 +337,12 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    transform: translateY(-150%);
+    transition: transform .3s ease-in-out;
+}
+
+.details header:hover .btn-back {
+    transform: initial;
 }
 
 /*
