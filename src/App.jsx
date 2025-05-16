@@ -28,7 +28,7 @@ export default function App() {
             setError('');
 
             setIsLoading(true);
-            const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${debouncedSearchQuery}`);
+            const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`);
             if (!res.ok) throw new Error('Something went wrong')
 
             const data = await res.json();
@@ -40,10 +40,11 @@ export default function App() {
         } finally {
             setIsLoading(false);
         }
-    }, [debouncedSearchQuery]);
+    }, []);
 
     useEffect(() => {
-        if (debouncedSearchQuery.length < 3) {
+        const MIN_CHARS = 3;
+        if (debouncedSearchQuery.length < MIN_CHARS) {
             setMovies([]);
             setError('');
             return;
@@ -53,6 +54,20 @@ export default function App() {
 
     function handleSelectMovie(id) {
         setSelectedMovieId(prevId => prevId === id ? null : id)
+    }
+
+    function handleAddWatched(movie) {
+        if (!findExistingMovie(movie.imdbID)) {
+            setWatched(movies => [...movies, movie]);
+        }
+        setSelectedMovieId(null);
+    }
+    function handleDeleteMovie(movieID) {
+        setWatched(movies => movies.filter(movie => movieID !== movie.imdbID));
+    }
+
+    function findExistingMovie(movieID) {
+        return watched.find(w => w.imdbID === movieID);
     }
 
     return (
@@ -79,12 +94,19 @@ export default function App() {
                 <Box>
                     {selectedMovieId
                         ? <MovieDetails
+                            key={selectedMovieId}
                             id={selectedMovieId}
+                            isWatched={() => findExistingMovie(selectedMovieId)}
+                            onAddWatched={handleAddWatched}
                             onCloseMovie={() => setSelectedMovieId(null)}
                         /> :
                         <>
                             <WatchedSummary watched={watched}/>
-                            <WatchedList watched={watched}/>
+                            <WatchedList
+                                watched={watched}
+                                onDelete={handleDeleteMovie}
+                                onSelect={id => setSelectedMovieId(id)}
+                            />
                         </>
                         }
                 </Box>

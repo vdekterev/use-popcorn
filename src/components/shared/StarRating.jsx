@@ -1,6 +1,6 @@
 import {useState} from "react";
 
-export default function StarRating({maxRating = 10, width = 20, onRate = () => null}) {
+export default function StarRating({maxRating = 10, width = 20, onRate}) {
     const containerStyle = {
         display: 'flex', gap: '4px'
     }
@@ -11,7 +11,7 @@ export default function StarRating({maxRating = 10, width = 20, onRate = () => n
 
     function handleRatingChange(num) {
         setRating(num);
-        onRate(num)
+        onRate(num);
     }
     return (
         <div style={containerStyle} onMouseLeave={() => setTempRating(0)}>

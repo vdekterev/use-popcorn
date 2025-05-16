@@ -1,6 +1,10 @@
-export default function WatchedListItem({ title, poster, imdbRating, userRating, runtime }) {
+export default function WatchedListItem({ title, poster, imdbRating, userRating, runtime, onDelete, onSelect }) {
+    function handleDelete(e) {
+        e.stopPropagation();
+        onDelete();
+    }
     return (
-        <li>
+        <li onClick={onSelect}>
             <img src={poster} alt={`${title} poster`}/>
             <h3>{title}</h3>
             <div>
@@ -16,6 +20,7 @@ export default function WatchedListItem({ title, poster, imdbRating, userRating,
                     <span>⏳</span>
                     <span>{runtime} min</span>
                 </p>
+                <button className="btn-delete" onClick={handleDelete}>x</button>
             </div>
         </li>
     );
