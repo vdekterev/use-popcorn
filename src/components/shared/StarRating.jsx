@@ -1,35 +1,47 @@
 import {useState} from "react";
 
-export default function StarRating({maxRating = 5}) {
+export default function StarRating({maxRating = 10, width = 20, onRate = () => null}) {
     const containerStyle = {
-        display: 'flex', alignItems: 'center', gap: '4px'
+        display: 'flex', gap: '4px'
     }
 
     const [rating, setRating] = useState(0);
+    const [tempRating, setTempRating] = useState(0);
+    const visibleRating = tempRating > 0 ? tempRating : rating;
 
+    function handleRatingChange(num) {
+        setRating(num);
+        onRate(num)
+    }
     return (
-        <div style={containerStyle} onMouseLeave={() => setRating(0)}>
+        <div style={containerStyle} onMouseLeave={() => setTempRating(0)}>
             {[...Array(maxRating).keys()].map(i =>
                 <StarSVG
                     key={i}
-                    width={30}
-                    fillColor={i < rating ? 'yellow' : 'none'}
+                    width={width}
+                    fillColor={i < visibleRating ? 'yellow' : 'none'}
                     number={i + 1}
-                    onHover={num => setRating(num)}
+                    onHover={num => setTempRating(num)}
+                    onRate={num => handleRatingChange(num)}
                 />
             )}
-            {rating}
+            <div>{visibleRating}</div>
         </div>
     );
 }
 
-function StarSVG({number, width, fillColor = "none", stroke = "#000", onHover}) {
+function StarSVG({number, width, fillColor = "none", stroke = "#000", onHover, onRate}) {
     const starStyle = {
         cursor: 'pointer',
         aspectRatio: 1
     }
     return (
-        <div role="button" style={starStyle} onMouseEnter={() => onHover(number)}>
+        <div
+            role="button"
+            style={starStyle}
+            onMouseEnter={() => onHover(number)}
+            onClick={() => onRate(number)}
+        >
             <svg xmlns="http://www.w3.org/2000/svg"
                  viewBox="0 0 24 24"
                  fill={fillColor}

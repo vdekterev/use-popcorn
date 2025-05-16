@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import NavBar from "./components/NavBar/NavBar";
 import Main from "./components/Main/Main";
 import SearchBar from "./components/NavBar/SearchBar";
@@ -23,42 +23,33 @@ export default function App() {
     const [searchQuery, setSearchQuery] = useState('');
     const debouncedSearchQuery = useDebouncedValue(searchQuery);
 
-    useEffect(() => {
-        async function fetchMovies() {
-            try {
-                setError('');
+    const fetchMovies = useCallback(async query => {
+        try {
+            setError('');
 
-                setIsLoading(true);
-                const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${debouncedSearchQuery}`);
-                if (!res.ok) throw new Error('Something went wrong')
+            setIsLoading(true);
+            const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${debouncedSearchQuery}`);
+            if (!res.ok) throw new Error('Something went wrong')
 
-                const data = await res.json();
-                if (data.Response === 'False') throw new Error('Movie not found')
+            const data = await res.json();
+            if (data.Response === 'False') throw new Error('Movie not found')
 
-                setMovies(data.Search)
-            } catch (error) {
-                setError(error.message)
-            } finally {
-                setIsLoading(false);
-            }
+            setMovies(data.Search)
+        } catch (error) {
+            setError(error.message)
+        } finally {
+            setIsLoading(false);
         }
+    }, [debouncedSearchQuery]);
 
+    useEffect(() => {
         if (debouncedSearchQuery.length < 3) {
             setMovies([]);
             setError('');
             return;
         }
-        fetchMovies();
-    }, [debouncedSearchQuery]);
-
-    // useEffect(() => {
-    //     async function fetchMovie() {
-    //         const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&i=${selectedMovieId}`);
-    //         const data = await res.json();
-    //     }
-    //     if (!selectedMovieId) return;
-    //     fetchMovie();
-    // }, [selectedMovieId]);
+        void fetchMovies(debouncedSearchQuery);
+    }, [debouncedSearchQuery, fetchMovies]);
 
     function handleSelectMovie(id) {
         setSelectedMovieId(prevId => prevId === id ? null : id)
