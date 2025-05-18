@@ -1,12 +1,11 @@
-import {useCallback, useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 import StarRating from "../shared/StarRating";
 
 const KEY = '9fe50e69';
 
-export default function MovieDetails({id, isWatched, onAddWatched, onCloseMovie}) {
+export default function MovieDetails({id, watched, onAddWatched, onCloseMovie}) {
     const [movie, setMovie] = useState({});
     const [userRating, setUserRating] = useState(0);
-    const isMovieWatched = useRef({});
 
     const {
         Title: title,
@@ -30,9 +29,27 @@ export default function MovieDetails({id, isWatched, onAddWatched, onCloseMovie}
     useEffect(() => {
         if (!id) return;
         void getMovieDetails(id);
-        isMovieWatched.current = isWatched();
 
     }, [id, getMovieDetails]);
+
+    useEffect(() => {
+        if (!title) return;
+        document.title = `Movie | ${title}`;
+        return () => document.title = 'usePopcorn';
+    }, [title])
+
+    useEffect(() => {
+        function handleKeydown(e) {
+            const keycodes = ['Escape', 'Backspace'];
+            if (keycodes.includes(e.code)) {
+                e.preventDefault();
+                onCloseMovie();
+            }
+        }
+        document.addEventListener('keydown', handleKeydown);
+
+        return () => document.removeEventListener('keydown', handleKeydown);
+    }, [onCloseMovie]);
 
     function handleAddWatched() {
         const newMovie = {
@@ -46,6 +63,10 @@ export default function MovieDetails({id, isWatched, onAddWatched, onCloseMovie}
         }
         onAddWatched(newMovie);
     }
+
+    const isWatched = useMemo(() => {
+        return watched.find(w => w.imdbID === id);
+    }, [watched, id]);
 
     return (
         <div className="details">
@@ -61,14 +82,12 @@ export default function MovieDetails({id, isWatched, onAddWatched, onCloseMovie}
             </header>
             <section>
                 <div className="rating">
-                    {isMovieWatched.current?.userRating > 0 ? (
-                        isMovieWatched.current.userRating
+                    {isWatched ? (
+                        <p style={{textAlign: 'center'}}>You rated this movie {isWatched.userRating} ⭐</p>
                     ) : (
                         <>
                         <StarRating key={id} onRate={r => setUserRating(r)} />
-                        {userRating > 0 && (
-                            <button className="btn-add" onClick={handleAddWatched}>+ Add to list</button>
-                        )}
+                        {userRating > 0 && <button className="btn-add" onClick={handleAddWatched}>+ Add to list</button>}
                         </>
                     )}
 

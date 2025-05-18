@@ -62,6 +62,7 @@ export default function App() {
         }
         setSelectedMovieId(null);
     }
+
     function handleDeleteMovie(movieID) {
         setWatched(movies => movies.filter(movie => movieID !== movie.imdbID));
     }
@@ -69,6 +70,7 @@ export default function App() {
     function findExistingMovie(movieID) {
         return watched.find(w => w.imdbID === movieID);
     }
+
 
     return (
         <>
@@ -96,7 +98,7 @@ export default function App() {
                         ? <MovieDetails
                             key={selectedMovieId}
                             id={selectedMovieId}
-                            isWatched={() => findExistingMovie(selectedMovieId)}
+                            watched={watched}
                             onAddWatched={handleAddWatched}
                             onCloseMovie={() => setSelectedMovieId(null)}
                         /> :

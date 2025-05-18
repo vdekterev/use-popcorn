@@ -146,6 +146,7 @@ body {
 }
 
 .list li {
+    cursor: pointer;
     position: relative;
     display: grid;
     grid-template-columns: 4rem 1fr;
