@@ -12,6 +12,7 @@ import ErrorMessage from "./components/shared/ErrorMessage";
 import useDebouncedValue from "./components/hooks/useDebouncedValue";
 import MovieDetails from "./components/Main/MovieDetails";
 import useLocalStorage from "./components/hooks/useLocalStorage";
+import {useMovies} from "./components/hooks/useMovies";
 
 const KEY = '9fe50e69';
 
@@ -23,6 +24,7 @@ export default function App() {
     const [error, setError] = useState('');
     const [searchQuery, setSearchQuery] = useState('south park');
     const debouncedSearchQuery = useDebouncedValue(searchQuery);
+    // const [movies, isLoading, error] = useMovies(debouncedSearchQuery);
 
     const fetchMovies = useCallback(async query => {
         try {
