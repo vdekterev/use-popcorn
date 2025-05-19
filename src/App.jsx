@@ -11,16 +11,17 @@ import Loader from "./components/shared/Loader";
 import ErrorMessage from "./components/shared/ErrorMessage";
 import useDebouncedValue from "./components/hooks/useDebouncedValue";
 import MovieDetails from "./components/Main/MovieDetails";
+import useLocalStorage from "./components/hooks/useLocalStorage";
 
 const KEY = '9fe50e69';
 
 export default function App() {
     const [movies, setMovies] = useState([]);
     const [selectedMovieId, setSelectedMovieId] = useState(null);
-    const [watched, setWatched] = useState([]);
+    const [watched, setWatched] = useLocalStorage('watched', []);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState('south park');
     const debouncedSearchQuery = useDebouncedValue(searchQuery);
 
     const fetchMovies = useCallback(async query => {
@@ -58,7 +59,7 @@ export default function App() {
 
     function handleAddWatched(movie) {
         if (!findExistingMovie(movie.imdbID)) {
-            setWatched(movies => [...movies, movie]);
+            setWatched(watched => [...watched, movie]);
         }
         setSelectedMovieId(null);
     }
@@ -71,7 +72,9 @@ export default function App() {
         return watched.find(w => w.imdbID === movieID);
     }
 
-
+    useEffect(() => {
+        setWatched(watched);
+    }, [watched, setWatched]);
     return (
         <>
             <NavBar>
