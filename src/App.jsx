@@ -9,48 +9,20 @@ import Box from "./components/shared/Box";
 import WatchedSummary from "./components/Main/WatchedList/WatchedSummary";
 import Loader from "./components/shared/Loader";
 import ErrorMessage from "./components/shared/ErrorMessage";
-import useDebouncedValue from "./components/hooks/useDebouncedValue";
 import MovieDetails from "./components/Main/MovieDetails";
+
+import { useDebouncedValue } from "./components/hooks/useDebouncedValue";
+import { useLocalStorage } from "./components/hooks/useLocalStorage";
+import { useMovies } from "./components/hooks/useMovies";
 
 const KEY = '9fe50e69';
 
 export default function App() {
-    const [movies, setMovies] = useState([]);
     const [selectedMovieId, setSelectedMovieId] = useState(null);
-    const [watched, setWatched] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [searchQuery, setSearchQuery] = useState('');
+    const [watched, setWatched] = useLocalStorage('watched', []);
+    const [searchQuery, setSearchQuery] = useState('south park');
     const debouncedSearchQuery = useDebouncedValue(searchQuery);
-
-    const fetchMovies = useCallback(async query => {
-        try {
-            setError('');
-
-            setIsLoading(true);
-            const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`);
-            if (!res.ok) throw new Error('Something went wrong')
-
-            const data = await res.json();
-            if (data.Response === 'False') throw new Error('Movie not found')
-
-            setMovies(data.Search)
-        } catch (error) {
-            setError(error.message)
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        const MIN_CHARS = 3;
-        if (debouncedSearchQuery.length < MIN_CHARS) {
-            setMovies([]);
-            setError('');
-            return;
-        }
-        void fetchMovies(debouncedSearchQuery);
-    }, [debouncedSearchQuery, fetchMovies]);
+    const { movies, isLoading, error } = useMovies(debouncedSearchQuery);
 
     function handleSelectMovie(id) {
         setSelectedMovieId(prevId => prevId === id ? null : id)
@@ -58,7 +30,7 @@ export default function App() {
 
     function handleAddWatched(movie) {
         if (!findExistingMovie(movie.imdbID)) {
-            setWatched(movies => [...movies, movie]);
+            setWatched(watched => [...watched, movie]);
         }
         setSelectedMovieId(null);
     }
@@ -71,7 +43,9 @@ export default function App() {
         return watched.find(w => w.imdbID === movieID);
     }
 
-
+    useEffect(() => {
+        setWatched(watched);
+    }, [watched, setWatched]);
     return (
         <>
             <NavBar>
