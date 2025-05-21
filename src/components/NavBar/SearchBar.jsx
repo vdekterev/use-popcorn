@@ -1,21 +1,13 @@
-import {useEffect, useRef} from "react";
+import { useRef } from "react";
+import {useKeyPress} from "../hooks/useKeyPress";
 
 export default function SearchBar({ query, onSetQuery }) {
     const inputEl = useRef();
-
-    useEffect(() => {
-        const handleFocusInput = e => {
-            if (document.activeElement === inputEl.current) return;
-
-            if (e.code === 'Enter') {
-                e.stopPropagation();
-                inputEl.current.focus();
-            }
-        }
-        document.addEventListener('keydown', handleFocusInput);
-        return () => document.removeEventListener('keydown', handleFocusInput)
-    }, [])
-
+    useKeyPress(['Enter', 'NumpadEnter'],  e => {
+        if (document.activeElement === inputEl.current) return;
+        e.stopPropagation();
+        inputEl.current.focus();
+    });
     return (
         <input
             ref={inputEl}

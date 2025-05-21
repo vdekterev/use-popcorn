@@ -1,11 +1,13 @@
 import {useCallback, useEffect, useMemo, useState} from "react";
 import StarRating from "../shared/StarRating";
+import {useKeyPress} from "../hooks/useKeyPress";
 
 const KEY = '9fe50e69';
 
 export default function MovieDetails({id, watched, onAddWatched, onCloseMovie}) {
     const [movie, setMovie] = useState({});
     const [userRating, setUserRating] = useState(0);
+    useKeyPress(['Escape', 'Backspace'], onCloseMovie)
 
     const {
         Title: title,
@@ -37,19 +39,6 @@ export default function MovieDetails({id, watched, onAddWatched, onCloseMovie}) 
         document.title = `Movie | ${title}`;
         return () => document.title = 'usePopcorn';
     }, [title])
-
-    useEffect(() => {
-        function handleKeydown(e) {
-            const keycodes = ['Escape', 'Backspace'];
-            if (keycodes.includes(e.code)) {
-                e.preventDefault();
-                onCloseMovie();
-            }
-        }
-        document.addEventListener('keydown', handleKeydown);
-
-        return () => document.removeEventListener('keydown', handleKeydown);
-    }, [onCloseMovie]);
 
     function handleAddWatched() {
         const newMovie = {
